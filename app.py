@@ -23,6 +23,19 @@ def menu():
 #edit products
 #delete products
 #search products
+def clean_id(id_str, id_options):
+    try:
+        product_id = int(id_str)
+    except ValueError:
+        input('''
+              \n****** ID ERROR ******
+              \rThe id should be a number.
+              \rPress enter to try again.
+              \r**********************''')
+        return
+    else:
+        
+        return product_id
 
 def clean_quantity(quantity):
     try:
@@ -98,7 +111,7 @@ def app():
         choice = menu()
         if choice == 'v':
             #view
-            pass
+            for 
         elif choice == 'n':
             product_name = input('Product Name: ')
             price_error = True
@@ -113,9 +126,20 @@ def app():
                 product_quantity = clean_quantity(product_quantity)
                 if type(product_quantity) == int:
                     quantity_error = False
+            brand_name_input = input('Brand Name: ')
+            brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
+            if brand_name_in_db == None:
+                new_brand = Brand(brand_name=brand_name_input)
+                session.add(new_brand)
+                session.commit() 
+                brand_name = session.query(Brand).filter(Brand.brand_name==brand_name).first().product_id
+            else:
+                brand_name = brand_name_in_db
+                new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_name)
             date_updated = datetime.datetime.now()
-            new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
-
+            session.add(new_product)
+            session.commit()
+            input('Product was added. Press enter to continue.')
 
         elif choice == 'a':
             #view analysis
