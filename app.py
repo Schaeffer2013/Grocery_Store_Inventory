@@ -25,8 +25,18 @@ def menu():
 #search products
 
 def clean_quantity(quantity):
-    product_quantity = int(quantity)
-    return product_quantity
+    try:
+        product_quantity = int(quantity)
+    except ValueError:
+        input('''
+              \n****** QUANTITY ERROR ******
+              \rThe quantity should be a number.
+              \rPress enter to try again.
+              \r****************************''')
+        return
+    else:
+        return product_quantity
+
 
 def clean_price(price_str):
     try:
@@ -34,7 +44,7 @@ def clean_price(price_str):
         price_float = float(price_string)
     except ValueError:
         input('''
-              \n****** RPICE ERROR ******
+              \n****** PRICE ERROR ******
               \rThe price should be a number without a currency symbol.
               \rEx: 9.99
               \rPress enter to try again.
@@ -90,16 +100,22 @@ def app():
             #view
             pass
         elif choice == 'n':
-            #add new product
             product_name = input('Product Name: ')
-            price_error =True
+            price_error = True
             while price_error:
                 product_price = input('Product Price (Ex: 9.99): ')
                 product_price = clean_price(product_price)
                 if type(product_price) == int:
                     price_error = False
-            product_quantity = input('Product Qunatity: ')
+            quantity_error = True
+            while quantity_error:
+                product_quantity = input('Product Qunatity: ')
+                product_quantity = clean_quantity(product_quantity)
+                if type(product_quantity) == int:
+                    quantity_error = False
             date_updated = datetime.datetime.now()
+            new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
+
 
         elif choice == 'a':
             #view analysis
