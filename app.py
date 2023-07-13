@@ -12,40 +12,44 @@ def menu():
               \rB) Make a backup of the entire inventory database
               ''')
         choice = input('What would you like to do? ')
-        if choice in ['V', 'N', 'A', 'B']:
-            return choice
+        if choice in ['v', 'n', 'a', 'b']:
+            return choice.lower()
         else:
             input('''
                   \rPlease choose one of the options above.
                   \rV, N, A, or B. 
                   \rPress enter to try again ''')
 
-#add products to the database
 #edit products
 #delete products
 #search products
-#data cleaning
-#loop runs program
 
 def clean_quantity(quantity):
     product_quantity = int(quantity)
     return product_quantity
 
 def clean_price(price_str):
-    price_string = price_str.strip('$')
-    price_float = float(price_string)
-    return int(price_float * 100)
+    try:
+        price_string = price_str.strip('$')
+        price_float = float(price_string)
+    except ValueError:
+        input('''
+              \n****** RPICE ERROR ******
+              \rThe price should be a number without a currency symbol.
+              \rEx: 9.99
+              \rPress enter to try again.
+              \r*************************''')
+    else:
+        return int(price_float * 100)
     
-
-
 
 def clean_date(date_str):
     split_date = date_str.split('/')
     month = int(split_date[0])
     day = int(split_date[1].split(',')[0])
     year = int(split_date[2])
-    return_date = datetime.date(year, month, day)
-
+    return datetime.date(year, month, day)
+ 
 
 
 def add_csv():
@@ -59,6 +63,7 @@ def add_csv():
                 new_brand = Brand(brand_name=brand_name)
                 session.add(new_brand)
         session.commit()
+               
 
     with open('inventory.csv') as csvfile2:
         data = csv.reader(csvfile2)
@@ -77,28 +82,29 @@ def add_csv():
 
 
 
-
-
-
 def app():
     app_running = True
     while app_running:
         choice = menu()
-        if choice.lower() == 'v':
+        if choice == 'v':
             #view
             pass
         elif choice == 'n':
             #add new product
             product_name = input('Product Name: ')
-            product_price = input('Product Price (Ex: 9.99): ')
-            product_price = clean_price(product_price)
+            price_error =True
+            while price_error:
+                product_price = input('Product Price (Ex: 9.99): ')
+                product_price = clean_price(product_price)
+                if type(product_price) == int:
+                    price_error = False
             product_quantity = input('Product Qunatity: ')
-            date_updated = input('Date Updated (Ex: 4/30/2023): ')
-            date_updated = clean_date(date_updated)
-        elif choice.lower() == 'a':
+            date_updated = datetime.datetime.now()
+
+        elif choice == 'a':
             #view analysis
             pass
-        elif choice.lower() == 'b':
+        elif choice == 'b':
             #backup
             pass
 
@@ -108,8 +114,8 @@ def app():
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
+    add_csv()
     app()
-    #add_csv()
 
 
     
