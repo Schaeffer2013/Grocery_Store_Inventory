@@ -70,7 +70,7 @@ def add_csv():
                 product_price = clean_price(inventory_row[1])
                 product_quantity = clean_quantity(inventory_row[2])
                 date_updated = clean_date(inventory_row[3])
-                brand_id = session.query(Brand.id).filter(Brand.brand_name==inventory_row[4])
+                brand_id = session.query(Brand.brand_id).filter(Brand.brand_name==inventory_row[4])
                 new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
                 session.add(new_product)
         session.commit()
@@ -87,9 +87,14 @@ def app():
         if choice.lower() == 'v':
             #view
             pass
-        elif choice.lower() == 'n':
+        elif choice == 'n':
             #add new product
-            pass
+            product_name = input('Product Name: ')
+            product_price = input('Product Price (Ex: 9.99): ')
+            product_price = clean_price(product_price)
+            product_quantity = input('Product Qunatity: ')
+            date_updated = input('Date Updated (Ex: 4/30/2023): ')
+            date_updated = clean_date(date_updated)
         elif choice.lower() == 'a':
             #view analysis
             pass
@@ -103,9 +108,8 @@ def app():
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
-    #app()
-    add_csv()
+    app()
+    #add_csv()
 
-    for product in session.query(Product):
-        print(product)
+
     
