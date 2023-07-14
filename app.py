@@ -115,18 +115,9 @@ def app():
     while app_running:
         choice = menu()
         if choice == 'v':
-            id_options = []
-            for product_name in session.query(Product):
-                id_options.append(product.id)
-            id_error = True
-            while id_error:
-                id_choice = input('''
-                    \nId Options: {id_options}
-                    \rProduct id: ''')
-                id_choice = clean_id(id_choice, id_options)
-                if type(id_choice) == int:
-                    id_error = False
-            the_product = session.query(Product).filter(Product.id==id_choice).first()
+            for product in session.query(Product):
+                print(f' {product_name} | {product_price} | {product_quantity} | {brand_name}')
+            input('\nPress enter to return to the main menu.')
         elif choice == 'n':
             product_name = input('Product Name: ')
             price_error = True
