@@ -20,9 +20,6 @@ def menu():
                   \rV, N, A, or B. 
                   \rPress enter to try again ''')
 
-#edit products
-#delete products
-#search products
 def clean_id(id_str, id_options):
     try:
         product_id = int(id_str)
@@ -34,7 +31,7 @@ def clean_id(id_str, id_options):
               \r**********************''')
         return
     else:
-        
+
         return product_id
 
 def clean_quantity(quantity):
@@ -110,8 +107,12 @@ def app():
     while app_running:
         choice = menu()
         if choice == 'v':
-            #view
-            for 
+            id_options = []
+            for product_name in session.query(Product):
+                id_options.append(product.id)
+            input('''
+                  \nId Options: {id_options}
+                  \rProduct id: ''')
         elif choice == 'n':
             product_name = input('Product Name: ')
             price_error = True
