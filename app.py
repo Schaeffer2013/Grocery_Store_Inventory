@@ -20,7 +20,7 @@ def menu():
                   \rV, N, A, or B. 
                   \rPress enter to try again ''')
 
-def clean_id(id_str, id_options):
+def clean_id(id_str, options):
     try:
         product_id = int(id_str)
     except ValueError:
@@ -31,8 +31,16 @@ def clean_id(id_str, id_options):
               \r**********************''')
         return
     else:
-
-        return product_id
+        if product_id in options:
+            return product_id
+        else:
+            input('''
+              \n****** ID ERROR ******
+              \rOptions: {options}.
+              \rPress enter to try again.
+              \r**********************''')
+            return
+        
 
 def clean_quantity(quantity):
     try:
@@ -110,9 +118,15 @@ def app():
             id_options = []
             for product_name in session.query(Product):
                 id_options.append(product.id)
-            input('''
-                  \nId Options: {id_options}
-                  \rProduct id: ''')
+            id_error = True
+            while id_error:
+                id_choice = input('''
+                    \nId Options: {id_options}
+                    \rProduct id: ''')
+                id_choice = clean_id(id_choice, id_options)
+                if type(id_choice) == int:
+                    id_error = False
+            the_product = session.query(Product).filter(Product.id==id_choice).first()
         elif choice == 'n':
             product_name = input('Product Name: ')
             price_error = True
