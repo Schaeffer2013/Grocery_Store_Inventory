@@ -239,16 +239,25 @@ def app():
             input('\nPress enter to return to main menu.')
         elif choice == 'b':
                 def backup_inventory():
-                    inventory_data = session.query(Product.product_name, 
-                                                   Product.product_price / 100, 
-                                                   Product.product_quantity, 
-                                                   Product.date_updated.strftime('%m/%d/%Y').label('date_updated'), 
-                                                   Brand.brand_name).join(Brand).all()
+                    inventory_data = session.query(Product).all()
                     field_names = ['product_name', 'product_price', 'product_quantity','date_updated', 'brand_name']
                     with open('backup_inventory.csv', 'w', newline='') as csvfile:
                         writer = csv.DictWriter(csvfile, fieldnames=field_names)
                         writer.writeheader()
-                        writer.writerows(map(dict, inventory_data))
+                        for product in inventory_data:
+                            product_price = product.product_price / 100
+                            date_updated = (product.date_updated)
+
+                            print(f'''
+                                  \n****** Backup Iventory ******
+                                  \rProduct Name: {product.product_name}, 
+                                  Product Price: {product_price}, 
+                                  Product Quantity: {product.product_quantity}, 
+                                  Date Updated: {date_updated}, 
+                                  Brand Name: {product.brand}
+                                ''')
+                            writer.writerow(inventory_data)
+            
                 def backup_brands():
                     brand_data = session.query(Brand.brand_name).all()
                     field_names = ['brand_name']
