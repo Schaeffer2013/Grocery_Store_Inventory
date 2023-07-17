@@ -1,6 +1,7 @@
 from models import (func, Base, session, engine, Brand, Product)
 import datetime
-import csv
+import csv 
+import time
 
 def menu():
     while True:
@@ -99,7 +100,7 @@ def edit_check(column_name, current_value):
     if column_name == 'Product Price':
         print(f'\rCurrent Value: {current_value/100}')
     elif column_name == 'Date Updated':
-        print(f'\rCurrent Value: {current_value.strftime("%B %d, %Y")}')
+        print(f'\rCurrent Value: {current_value.strftime("%m/%d/%Y")}')
     else:
         print(f'\rCurrent Value: {current_value}')
 
@@ -178,15 +179,18 @@ def app():
                     \rBrand: {brand_name}''')
                 sub_choice = submenu()
                 if sub_choice == '1':
-                    #edit
-                    the_product.product_name = edit_check('Product Name', the_product.product_name)
-                    the_product.product_price = edit_check('Product Price', the_product.product_price)
-                    the_product.product_quantity = edit_check('Product Quantity', the_product.product_quantity)
-                    the_product.date_updated = edit_check('Date Updated', the_product.date_updated)
-                    print(session.dirty)
+                    product_name = edit_check('Product Name', product_name)
+                    product_price = edit_check('Product Price', product_price)
+                    product_quantity = edit_check('Product Quantity', product_quantity)
+                    date_updated = edit_check('Date Updated', date_updated)
+                    session.commit()
+                    print('Product Updated!')
+                    time.sleep(1.5)
                 if sub_choice == '2':
-                    #delete
-                    pass
+                    session.delete(the_product)
+                    session.commit()
+                    print('Product Deleted!')
+                    time.sleep(1.5)
 
         elif choice == 'n':
             product_name = input('Product Name: ')
@@ -233,8 +237,27 @@ def app():
                 ''')
             input('\nPress enter to return to main menu.')
         elif choice == 'b':
-            #backup
-            pass
+                def backup_inventory():
+                    inventory_data = session.query(Product.product_name, 
+                                                   Product.product_price / 100, 
+                                                   Product.product_quantity, 
+                                                   Product.date_updated.strftime('%m/%d/%Y').label('date_updated'), 
+                                                   Brand.brand_name).join(Brand).all()
+                    field_names = ['product_name', 'product_price', 'product_quantity','date_updated', 'brand_name']
+                    with open('backup_inventory.csv', 'w', newline='') as csvfile:
+                        writer = csv.DictWriter(csvfile, fieldnames=field_names)
+                        writer.writeheader()
+                        writer.writerows(map(dict, inventory_data))
+                def backup_brands():
+                    brand_data = session.query(Brand.brand_name).all()
+                    field_names = ['brand_name']
+                    with open('backup_brands.csv', 'w', newline='') as csvfile:
+                        writer = csv.DictWriter(csvfile, fieldnames=field_names)
+                        writer.writeheader()
+                        writer.writerows(map(dict, brand_data))
+                backup_inventory()
+                backup_brands()
+
 
 
 

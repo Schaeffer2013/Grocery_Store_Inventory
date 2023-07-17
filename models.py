@@ -14,6 +14,7 @@ class Brand(Base):
 
     brand_id = Column(Integer, primary_key=True)
     brand_name = Column('Brand Name', String)
+    product = relationship('Product', back_populates='brand')
 
     def __repr__(self):
         return f'{self.brand_name}'
@@ -28,6 +29,7 @@ class Product(Base):
     product_price = Column('Product Price', Integer)
     date_updated = Column('Date Updated', Date)
     brand_id = Column(Integer, ForeignKey('brands.brand_id'))
+    brand = relationship('Brand', back_populates='product')
 
     def __repr__(self):
         return f'Product Name: {self.product_name}  Product Quantity: {self.product_quantity} Product Price: {self.product_price} Date Updated: {self.date_updated}'
