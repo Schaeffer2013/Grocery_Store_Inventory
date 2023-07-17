@@ -10,14 +10,15 @@ def menu():
               \nV) View a product's inventory
               \rN) Add a new product
               \rA) View analysis
-              \rB) Make a backup of the entire inventory database''')
+              \rB) Make a backup of the entire inventory database
+              \rE) Exit the program''')
         choice = input('What would you like to do? ')
-        if choice in ['v', 'n', 'a', 'b']:
+        if choice in ['v', 'n', 'a', 'b', 'e']:
             return choice.lower()
         else:
             input('''
                   \rPlease choose one of the options above.
-                  \rV, N, A, or B. 
+                  \rV, N, A, B, or E 
                   \rPress enter to try again ''')
             
 
@@ -257,6 +258,10 @@ def app():
                         writer.writerows(map(dict, brand_data))
                 backup_inventory()
                 backup_brands()
+
+        else:
+            print('\nGOODBYE')
+            app_running = False
 
 
 
