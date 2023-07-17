@@ -1,4 +1,4 @@
-from models import (Base, session, engine, Brand, Product)
+from models import (func, Base, session, engine, Brand, Product)
 import datetime
 import csv
 
@@ -9,8 +9,7 @@ def menu():
               \nV) View a product's inventory
               \rN) Add a new product
               \rA) View analysis
-              \rB) Make a backup of the entire inventory database
-              ''')
+              \rB) Make a backup of the entire inventory database''')
         choice = input('What would you like to do? ')
         if choice in ['v', 'n', 'a', 'b']:
             return choice.lower()
@@ -19,8 +18,24 @@ def menu():
                   \rPlease choose one of the options above.
                   \rV, N, A, or B. 
                   \rPress enter to try again ''')
+            
 
-def clean_id(id_str, options):
+def submenu():
+    while True:
+        print('''
+              \r1) Edit
+              \r2) Delete
+              \r3) Return to main menu''')
+        choice = input('What would you like to do? ')
+        if choice in ['1', '2', '3']:
+            return choice
+        else:
+            input('''
+                  \rPlease choose one number of the options above.
+                  \rAnumber from 1-3.
+                  \rPress enter to try again.''')
+
+def clean_id(id_str, id_options):
     try:
         product_id = int(id_str)
     except ValueError:
@@ -31,12 +46,12 @@ def clean_id(id_str, options):
               \r**********************''')
         return
     else:
-        if product_id in options:
+        if product_id in id_options:
             return product_id
         else:
-            input('''
+            input(f'''
               \n****** ID ERROR ******
-              \rOptions: {options}.
+              \rOptions: {id_options}.
               \rPress enter to try again.
               \r**********************''')
             return
@@ -79,6 +94,30 @@ def clean_date(date_str):
     return datetime.date(year, month, day)
  
 
+def edit_check(column_name, current_value):
+    print(f'\n****** EDIT {column_name} ******')
+    if column_name == 'Product Price':
+        print(f'\rCurrent Value: {current_value/100}')
+    elif column_name == 'Date Updated':
+        print(f'\rCurrent Value: {current_value.strftime("%B %d, %Y")}')
+    else:
+        print(f'\rCurrent Value: {current_value}')
+
+    if column_name == 'Date Updated' or column_name == 'Product Price':
+        while True:
+            changes = input('What would you like to change the value to?')
+            if column_name == 'Date Updated':
+                changes = clean_date(changes)
+                if type(changes) == datetime.date:
+                    return changes
+            elif column_name == 'Product Price':
+                changes = clean_price(changes)
+                if type(changes) == int:
+                    return changes
+    else: 
+        return input('What would you like to change the value to?')
+
+
 
 def add_csv():
     with open('brands.csv') as csvfile:
@@ -115,9 +154,40 @@ def app():
     while app_running:
         choice = menu()
         if choice == 'v':
-            for product in session.query(Product):
-                print(f' {product_name} | {product_price} | {product_quantity} | {brand_name}')
-            input('\nPress enter to return to the main menu.')
+            id_options = []
+            for product in session.query(Product.product_id):
+                id_options.append(product[0])
+            id_error = True
+            while id_error:
+                id_choice = input(f'''
+                    \nId Options: {id_options}
+                    \rProduct id: ''')
+                id_choice = clean_id(id_choice, id_options)
+                if type(id_choice) == int:
+                    id_error = False
+            the_product = session.query(Product, Brand.brand_name).join(Brand, Product.brand_id == Brand.brand_id).filter(Product.product_id == id_choice).first()
+            if the_product:
+                product_name = the_product[0].product_name
+                product_price = the_product[0].product_price / 100
+                product_quantity = the_product[0].product_quantity
+                brand_name = the_product[1]
+                print(f'''
+                    \nProduct Name: {product_name}
+                    \rProduct Price: ${product_price}
+                    \rProduct Quantity: {product_quantity}
+                    \rBrand: {brand_name}''')
+                sub_choice = submenu()
+                if sub_choice == '1':
+                    #edit
+                    the_product.product_name = edit_check('Product Name', the_product.product_name)
+                    the_product.product_price = edit_check('Product Price', the_product.product_price)
+                    the_product.product_quantity = edit_check('Product Quantity', the_product.product_quantity)
+                    the_product.date_updated = edit_check('Date Updated', the_product.date_updated)
+                    print(session.dirty)
+                if sub_choice == '2':
+                    #delete
+                    pass
+
         elif choice == 'n':
             product_name = input('Product Name: ')
             price_error = True
@@ -148,8 +218,20 @@ def app():
             input('Product was added. Press enter to continue.')
 
         elif choice == 'a':
-            #view analysis
-            pass
+            most_expensive = session.query(Product.product_name).order_by(Product.product_price.desc()).first()
+            least_expensice = session.query(Product.product_name).order_by(Product.product_price).first()
+            total_products = session.query(Product).count()
+            brand_most_product = session.query(Brand.brand_name).join(Product).group_by(Brand.brand_id).order_by(func.count(Product.product_id).desc()).first()
+            brand_least_product = session.query(Brand.brand_name).join(Product).group_by(Brand.brand_id).order_by(func.count(Product.product_id)).first()
+            print(f'''
+                  \n******* PRODUCT ANALYSIS ******
+                  \rMost Expensive Product: {most_expensive}
+                  \rLeast Expensive Product: {least_expensice}
+                  \rTotal amount of Products: {total_products}
+                  \rBrand with most amount of Product: {brand_most_product}
+                  \rBrand with least amount of Products: {brand_least_product}
+                ''')
+            input('\nPress enter to return to main menu.')
         elif choice == 'b':
             #backup
             pass
