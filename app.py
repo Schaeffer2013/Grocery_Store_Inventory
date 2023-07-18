@@ -173,11 +173,13 @@ def app():
                 product_price = the_product[0].product_price / 100
                 product_quantity = the_product[0].product_quantity
                 brand_name = the_product[1]
+                date_updated = the_product[0].date_updated
                 print(f'''
                     \nProduct Name: {product_name}
                     \rProduct Price: ${product_price}
                     \rProduct Quantity: {product_quantity}
-                    \rBrand: {brand_name}''')
+                    \rBrand: {brand_name}
+                    \rDate Updated: {date_updated.strftime("%m/%d/%Y")}''')
                 sub_choice = submenu()
                 if sub_choice == '1':
                     product_name = edit_check('Product Name', product_name)
@@ -207,16 +209,23 @@ def app():
                 product_quantity = clean_quantity(product_quantity)
                 if type(product_quantity) == int:
                     quantity_error = False
-            brand_name_input = input('Brand Name: ')
-            brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
-            if brand_name_in_db == None:
-                new_brand = Brand(brand_name=brand_name_input)
-                session.add(new_brand)
-                session.commit() 
-                brand_name = session.query(Brand).filter(Brand.brand_name==brand_name).first().product_id
+            date_error = True
+            while date_error:
+                date_updated = input('Date Update (Ex: 4/30/2023): ')
+                date_updated = clean_date(date_updated)
+                if type(date_updated) == datetime.date:
+                    date_error = False
+            for brand_name in session.query(Brand.brand_name):
+                brand_name_input = input('Brand Name: ')
+                brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
+                if brand_name_in_db == None:
+                    new_brand = Brand(brand_name=brand_name_input)
+                    session.add(new_brand)
+                    session.commit() 
+                brand_name = session.query(Brand).filter(Brand.brand_name==Product.brand).first().brand_id
             else:
                 brand_name = brand_name_in_db
-                new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_name)
+                new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated.strftime("%m/%d/%Y"), brand_id=brand_name)
             date_updated = datetime.datetime.now()
             session.add(new_product)
             session.commit()
