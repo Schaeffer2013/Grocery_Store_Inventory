@@ -3,3 +3,6 @@ env
 /__pycache__
 .vscode
 .DS_Store
+inventory.db
+backup_brands.csv
+backup_inventory.csv

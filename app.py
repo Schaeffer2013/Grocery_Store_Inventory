@@ -203,7 +203,7 @@ def app():
                     price_error = False
             quantity_error = True
             while quantity_error:
-                product_quantity = input('Product Qunatity: ')
+                product_quantity = input('Product Quantity: ')
                 product_quantity = clean_quantity(product_quantity)
                 if type(product_quantity) == int:
                     quantity_error = False
@@ -224,14 +224,14 @@ def app():
 
         elif choice == 'a':
             most_expensive = session.query(Product.product_name).order_by(Product.product_price.desc()).first()
-            least_expensice = session.query(Product.product_name).order_by(Product.product_price).first()
+            least_expensive = session.query(Product.product_name).order_by(Product.product_price).first()
             total_products = session.query(Product).count()
             brand_most_product = session.query(Brand.brand_name).join(Product).group_by(Brand.brand_id).order_by(func.count(Product.product_id).desc()).first()
             brand_least_product = session.query(Brand.brand_name).join(Product).group_by(Brand.brand_id).order_by(func.count(Product.product_id)).first()
             print(f'''
                   \n******* PRODUCT ANALYSIS ******
                   \rMost Expensive Product: {most_expensive}
-                  \rLeast Expensive Product: {least_expensice}
+                  \rLeast Expensive Product: {least_expensive}
                   \rTotal amount of Products: {total_products}
                   \rBrand with most amount of Product: {brand_most_product}
                   \rBrand with least amount of Products: {brand_least_product}
@@ -244,27 +244,35 @@ def app():
                     with open('backup_inventory.csv', 'w', newline='') as csvfile:
                         writer = csv.DictWriter(csvfile, fieldnames=field_names)
                         writer.writeheader()
-                        for product in inventory_data:
-                            product_price = product.product_price / 100
-                            date_updated = (product.date_updated)
+                        unique_brands = set(product.brand for product in inventory_data)
+                        for brand_name in unique_brands:
+                            for product in inventory_data:
+                                if product.brand == brand_name:
+                                    product_price = product.product_price / 100
+                                    date_updated = product.date_updated
 
-                            print(f'''
-                                  \n****** Backup Iventory ******
-                                  \rProduct Name: {product.product_name}, 
-                                  Product Price: {product_price}, 
-                                  Product Quantity: {product.product_quantity}, 
-                                  Date Updated: {date_updated}, 
-                                  Brand Name: {product.brand}
-                                ''')
-                            writer.writerow(inventory_data)
-            
+                                    writer.writerow({
+                                        'product_name': product.product_name,
+                                        'product_price': product_price,
+                                        'product_quantity': product.product_quantity,
+                                        'date_updated': date_updated,
+                                        'brand_name': brand_name
+                                    })
+                            
+
+                            
                 def backup_brands():
                     brand_data = session.query(Brand.brand_name).all()
                     field_names = ['brand_name']
                     with open('backup_brands.csv', 'w', newline='') as csvfile:
-                        writer = csv.DictWriter(csvfile, fieldnames=field_names)
-                        writer.writeheader()
-                        writer.writerows(map(dict, brand_data))
+                        writer = csv.writer(csvfile)
+                        writer.writerow(field_names)
+                        for brand in brand_data:
+                            brand_name = brand.brand_name
+                            writer.writerow([brand_name])
+                            
+                print('\n*** DATA HAS BEEN BACKUP UP ***')
+                input('\nPress enter to return back to the main menu.')                
                 backup_inventory()
                 backup_brands()
 
