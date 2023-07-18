@@ -253,9 +253,9 @@ def app():
 
                                     writer.writerow({
                                         'product_name': product.product_name,
-                                        'product_price': product_price,
+                                        'product_price': f'${product_price}',
                                         'product_quantity': product.product_quantity,
-                                        'date_updated': date_updated,
+                                        'date_updated': f'{date_updated.strftime("%m/%d/%Y")}',
                                         'brand_name': brand_name
                                     })
                             
@@ -271,10 +271,11 @@ def app():
                             brand_name = brand.brand_name
                             writer.writerow([brand_name])
                             
-                print('\n*** DATA HAS BEEN BACKUP UP ***')
-                input('\nPress enter to return back to the main menu.')                
+                                
                 backup_inventory()
                 backup_brands()
+                print('\n*** DATA HAS BEEN BACKUP UP ***')
+                input('\nPress enter to return back to the main menu.')
 
         else:
             print('\nGOODBYE')
