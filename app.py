@@ -185,7 +185,7 @@ def app():
                     product_name = edit_check('Product Name', product_name)
                     product_price = edit_check('Product Price', product_price)
                     product_quantity = edit_check('Product Quantity', product_quantity)
-                    date_updated = edit_check('Date Updated', date_updated)
+                    date_updated = datetime.datetime.now()
                     session.commit()
                     print('Product Updated!')
                     time.sleep(1.5)
