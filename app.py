@@ -107,7 +107,7 @@ def edit_check(column_name, current_value):
 
     if column_name == 'Date Updated' or column_name == 'Product Price':
         while True:
-            changes = input('What would you like to change the value to?')
+            changes = input('What would you like to change the value to? ')
             if column_name == 'Date Updated':
                 changes = clean_date(changes)
                 if type(changes) == datetime.date:
@@ -117,7 +117,7 @@ def edit_check(column_name, current_value):
                 if type(changes) == int:
                     return changes
     else: 
-        return input('What would you like to change the value to?')
+        return input('What would you like to change the value to? ')
 
 
 
@@ -190,10 +190,14 @@ def app():
                     print('Product Updated!')
                     time.sleep(1.5)
                 if sub_choice == '2':
-                    session.delete(the_product)
-                    session.commit()
-                    print('Product Deleted!')
-                    time.sleep(1.5)
+                    product_to_delete = session.query(Product).filter(Product.product_id == id_choice).first()
+                    if product_to_delete:
+                        session.delete(product_to_delete)
+                        session.commit()
+                        print('Product Deleted!')
+                        time.sleep(1.5)
+                    else:
+                        print('Product not found!')
 
         elif choice == 'n':
             product_name = input('Product Name: ')
@@ -209,24 +213,17 @@ def app():
                 product_quantity = clean_quantity(product_quantity)
                 if type(product_quantity) == int:
                     quantity_error = False
-            date_error = True
-            while date_error:
-                date_updated = input('Date Update (Ex: 4/30/2023): ')
-                date_updated = clean_date(date_updated)
-                if type(date_updated) == datetime.date:
-                    date_error = False
-            for brand_name in session.query(Brand.brand_name):
-                brand_name_input = input('Brand Name: ')
-                brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
-                if brand_name_in_db == None:
-                    new_brand = Brand(brand_name=brand_name_input)
-                    session.add(new_brand)
-                    session.commit() 
+            brand_name_input = input('Brand Name: ')
+            brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
+            if brand_name_in_db == None:
+                new_brand = Brand(brand_name=brand_name_input)
+                session.add(new_brand)
+                session.commit() 
                 brand_name = session.query(Brand).filter(Brand.brand_name==Product.brand).first().brand_id
             else:
-                brand_name = brand_name_in_db
-                new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated.strftime("%m/%d/%Y"), brand_id=brand_name)
+                brand_name = brand_name_in_db.brand_id
             date_updated = datetime.datetime.now()
+            new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_name)
             session.add(new_product)
             session.commit()
             input('Product was added. Press enter to continue.')
