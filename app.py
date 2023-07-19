@@ -12,9 +12,9 @@ def menu():
               \rA) View analysis
               \rB) Make a backup of the entire inventory database
               \rE) Exit the program''')
-        choice = input('What would you like to do? ')
+        choice = input('What would you like to do? ').lower()
         if choice in ['v', 'n', 'a', 'b', 'e']:
-            return choice.lower()
+            return choice
         else:
             input('''
                   \rPlease choose one of the options above.
@@ -122,6 +122,7 @@ def edit_check(column_name, current_value):
 
 
 def add_csv():
+    brand_name_to_id = {}
     with open('brands.csv') as csvfile:
         data = csv.reader(csvfile)
         rows = list(data)
@@ -131,7 +132,8 @@ def add_csv():
                 brand_name = brand_row[0]
                 new_brand = Brand(brand_name=brand_name)
                 session.add(new_brand)
-        session.commit()
+                session.commit()
+                brand_name_to_id[brand_name] = new_brand.brand_id
                
 
     with open('inventory.csv') as csvfile2:
@@ -139,15 +141,34 @@ def add_csv():
         rows = list(data)
         for inventory_row in rows[1:]:
             product_in_db = session.query(Product).filter(Product.product_name==inventory_row[0]).one_or_none()
-            if product_in_db == None:
+            product_name = inventory_row[0]
+            product_price = clean_price(inventory_row[1])
+            product_quantity = clean_quantity(inventory_row[2])
+            date_updated = clean_date(inventory_row[3])
+            brand_name = inventory_row[4]
+            if product_in_db is not None and product_in_db.date_updated >= date_updated:
+                continue
+            brand_name = inventory_row[4]
+            if brand_name not in brand_name_to_id:
+                brand_in_db = session.query(Brand).filter(Brand.brand_name==brand_name).one_or_none()
+                if brand_in_db is None:
+                    new_brand = Brand(brand_name=brand_name)
+                    session.add(new_brand)
+                    session.flush()
+                    brand_id = new_brand.brand_id
+                else:
+                    brand_id = brand_in_db.brand_id
+                brand_name_to_id[brand_name] = brand_id
+            if product_in_db:
+                product_in_db.product_price = product_price
+                product_in_db.product_quantity = product_quantity
+                product_in_db.date_updated = date_updated
+                product_in_db.brand_id = brand_id
+            else:
                 product_name = inventory_row[0]
-                product_price = clean_price(inventory_row[1])
-                product_quantity = clean_quantity(inventory_row[2])
-                date_updated = clean_date(inventory_row[3])
-                brand_id = session.query(Brand.brand_id).filter(Brand.brand_name==inventory_row[4])
                 new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
                 session.add(new_product)
-        session.commit()
+            session.commit()
 
 
 
@@ -213,15 +234,32 @@ def app():
                 product_quantity = clean_quantity(product_quantity)
                 if type(product_quantity) == int:
                     quantity_error = False
-            brand_name_input = input('Brand Name: ')
-            brand_name_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
-            if brand_name_in_db == None:
-                new_brand = Brand(brand_name=brand_name_input)
-                session.add(new_brand)
-                session.commit() 
-                brand_name = session.query(Brand).filter(Brand.brand_name==Product.brand).first().brand_id
-            else:
-                brand_name = brand_name_in_db.brand_id
+            existing_brands = session.query(Brand.brand_name).all()
+            brand_name = [Brand.brand_name for brand in existing_brands]
+            print('Brands to choose from:')
+            for index, brand_name in enumerate(brand_name, start=1):
+                print(f'{index} {brand_name}')
+            brand_name_input = input('Select a number of the Brand Name you want to do to: ')
+            try:
+                brand_index = int(brand_name_input)
+                if 1 <= brand_index <= len(brand_name):
+                    selected_brand = brand_name[brand_index - 1]
+                    brand_name_in_db = session.query(Brand).filter(Brand.brand_name==selected_brand).one_or_none()
+                    if brand_name_in_db == None:
+                        new_brand = Brand(brand_name=selected_brand)
+                        session.add(new_brand)
+                        session.commit()
+                        brand_name = new_brand.brand_id
+                    else:
+                        brand_name = brand_name_in_db.brand_id
+                else:
+                    print('Invalid choice, please choose a number of a brand from the options.')
+                    brand_name = None
+            except ValueError:
+                print('Invalid choice, please choose a number of a brand from the options. ')
+                brand_name = None
+
+
             date_updated = datetime.datetime.now()
             new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_name)
             session.add(new_product)
