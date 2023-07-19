@@ -165,6 +165,7 @@ def add_csv():
                 product_in_db.date_updated = date_updated
                 product_in_db.brand_id = brand_id
             else:
+                brand_id = brand_name_to_id[brand_name]
                 product_name = inventory_row[0]
                 new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_id)
                 session.add(new_product)
