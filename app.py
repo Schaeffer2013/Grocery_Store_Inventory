@@ -208,6 +208,12 @@ def app():
                     product_price = edit_check('Product Price', product_price)
                     product_quantity = edit_check('Product Quantity', product_quantity)
                     date_updated = datetime.datetime.now()
+                    the_product, brand_name = the_product
+                    the_product.product_name = product_name
+                    the_product.product_price = product_price
+                    the_product.product_quantity = product_quantity
+                    the_product.date_updated = date_updated
+                    the_product.brand_name = brand_name
                     session.commit()
                     print('Product Updated!')
                     time.sleep(1.5)
@@ -236,7 +242,7 @@ def app():
                 if type(product_quantity) == int:
                     quantity_error = False
             existing_brands = session.query(Brand.brand_name).all()
-            brand_name = [Brand.brand_name for brand in existing_brands]
+            brand_name = [brand.brand_name for brand in existing_brands]
             print('Brands to choose from:')
             for index, brand_name in enumerate(brand_name, start=1):
                 print(f'{index} {brand_name}')
