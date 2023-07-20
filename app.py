@@ -252,15 +252,15 @@ def app():
                 if type(product_quantity) == int:
                     quantity_error = False
             existing_brands = session.query(Brand.brand_name).all()
-            brand_name = [brand.brand_name for brand in existing_brands]
+            brand_names_list = [brand.brand_name for brand in existing_brands]
             print('Brands to choose from:')
-            for index, brand_name in enumerate(brand_name, start=1):
+            for index, brand_name in enumerate(brand_names_list, start=1):
                 print(f'{index} {brand_name}')
             brand_name_input = input('Select a number of the Brand Name you want to do to: ')
             try:
                 brand_index = int(brand_name_input)
-                if 1 <= brand_index <= len(brand_name):
-                    selected_brand = brand_name[brand_index - 1]
+                if 1 <= brand_index <= len(brand_names_list):
+                    selected_brand = brand_names_list[brand_index - 1]
                     brand_name_in_db = session.query(Brand).filter(Brand.brand_name==selected_brand).one_or_none()
                     if brand_name_in_db == None:
                         new_brand = Brand(brand_name=selected_brand)
