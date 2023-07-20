@@ -269,34 +269,42 @@ def app():
                         brand_id = new_brand.brand_id
                     else:
                         brand_id = brand_name_in_db.brand_id
-                    existing_product = session.query(Product).filter(Product.product_name==product_name).one_or_none()
-                    if existing_product:
-                        existing_product.product_price = product_price
-                        existing_product.product_quantity = product_quantity
-                        existing_product.date_updated = date_updated
-                        existing_product.brand_id = Product.brand_id
-                    else:
-                        new_product = Product(product_name=product_name,
-                                              product_price=product_price,
-                                              product_quantity=product_quantity,
-                                              date_updated=datetime.datetime.now(),
-                                              brand_id=brand_id
-                        )
-                        session.add(new_product)
-                    session.commit()
-                        
                 else:
                     print('Invalid choice, please choose a number of a brand from the options.')
-                    brand_name = None
+                    brand_id = None
             except ValueError:
                 print('Invalid choice, please choose a number of a brand from the options. ')
-                brand_name = None
+                brand_id = None
+            try:
+                date_updated = datetime.datetime.now()
+            except ValueError:
+                    print('Invalid date')
+                    date_updated = None
+            if brand_id and date_updated:
+                existing_product = session.query(Product).filter(Product.product_name==product_name).one_or_none()
+                if existing_product:
+                    existing_product.product_price = product_price
+                    existing_product.product_quantity = product_quantity
+                    existing_product.date_updated = datetime.datetime.now()
+                    existing_product.brand_id = Product.brand_id
+                else:
+                    new_product = Product(product_name=product_name,
+                                            product_price=product_price,
+                                            product_quantity=product_quantity,
+                                            date_updated=date_updated,
+                                            brand_id=brand_id
+                    )
+                    session.add(new_product)
+                session.commit()
+                        
+                #else:
+                 #   print('Invalid choice, please choose a number of a brand from the options.')
+                  #  brand_id = None
+            #except ValueError:
+             #   print('Invalid choice, please choose a number of a brand from the options. ')
+              #  brand_id = None
 
 
-            date_updated = datetime.datetime.now()
-            new_product = Product(product_name=product_name, product_price=product_price, product_quantity=product_quantity, date_updated=date_updated, brand_id=brand_name)
-            session.add(new_product)
-            session.commit()
             input('Product was added. Press enter to continue.')
 
         elif choice == 'a':
