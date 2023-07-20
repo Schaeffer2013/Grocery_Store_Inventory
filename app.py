@@ -102,6 +102,8 @@ def edit_check(column_name, current_value):
         print(f'\rCurrent Value: {current_value/100}')
     elif column_name == 'Date Updated':
         print(f'\rCurrent Value: {current_value.strftime("%m/%d/%Y")}')
+    elif column_name == 'Brand':
+        print(f'\rCurrent Value: {current_value}')
     else:
         print(f'\rCurrent Value: {current_value}')
 
@@ -116,6 +118,14 @@ def edit_check(column_name, current_value):
                 changes = clean_price(changes)
                 if type(changes) == int:
                     return changes
+    elif column_name == 'Brand':
+        while True:
+            brand_name_input = input('What would you like to change the value to? ')
+            brand_in_db = session.query(Brand).filter(Brand.brand_name==brand_name_input).one_or_none()
+            if brand_in_db:
+                return brand_name_input
+            else:
+                print('Brand name does not exist. Please choose an existing brand name.')
     else: 
         return input('What would you like to change the value to? ')
 
