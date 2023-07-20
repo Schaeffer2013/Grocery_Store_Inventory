@@ -286,7 +286,7 @@ def app():
                     existing_product.product_price = product_price
                     existing_product.product_quantity = product_quantity
                     existing_product.date_updated = datetime.datetime.now()
-                    existing_product.brand_id = Product.brand_id
+                    existing_product.brand_id = brand_id
                 else:
                     new_product = Product(product_name=product_name,
                                             product_price=product_price,
