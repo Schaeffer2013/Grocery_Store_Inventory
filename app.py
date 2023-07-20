@@ -266,9 +266,25 @@ def app():
                         new_brand = Brand(brand_name=selected_brand)
                         session.add(new_brand)
                         session.commit()
-                        brand_name = new_brand.brand_id
+                        brand_id = new_brand.brand_id
                     else:
-                        brand_name = brand_name_in_db.brand_id
+                        brand_id = brand_name_in_db.brand_id
+                    existing_product = session.query(Product).filter(Product.product_name==product_name).one_or_none()
+                    if existing_product:
+                        existing_product.product_price = product_price
+                        existing_product.product_quantity = product_quantity
+                        existing_product.date_updated = date_updated
+                        existing_product.brand_id = Product.brand_id
+                    else:
+                        new_product = Product(product_name=product_name,
+                                              product_price=product_price,
+                                              product_quantity=product_quantity,
+                                              date_updated=datetime.datetime.now(),
+                                              brand_id=brand_id
+                        )
+                        session.add(new_product)
+                    session.commit()
+                        
                 else:
                     print('Invalid choice, please choose a number of a brand from the options.')
                     brand_name = None
